@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Sensor Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a2e;
+            color: #eee;
+            text-align: center;
+            padding: 40px;
+        }
+        h1 { color: #00d4ff; }
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        th {
+            background-color: #00d4ff;
+            color: #1a1a2e;
+            padding: 12px;
+        }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+        }
+        tr:hover { background-color: #2a2a4e; }
+        .alert { color: #ff4444; font-weight: bold; }
+        button {
+            background-color: #00d4ff;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            margin: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>IoT Sensor Dashboard</h1>
+    <p>Live Temperature & Voltage Readings</p>
+    <button onclick="fetchData()">Refresh Data</button>
+    <table>
+        <thead>
+            <tr>
+                <th>Device ID</th>
+                <th>Temperature (°C)</th>
+                <th>Voltage (V)</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody id="data-table">
+        </tbody>
+    </table>
+
+    <script>
+        const API_URL = "https://xvp5r19y13.execute-api.us-east-1.amazonaws.com/prod/sensors";
+
+        function fetchData() {
+            fetch(API_URL)
+                .then(response => response.json())
+                .then(data => {
+                    const table = document.getElementById('data-table');
+                    table.innerHTML = '';
+                    data.forEach(item => {
+                        const date = new Date(item.timestamp * 1000).toLocaleString();
+                        const tempAlert = item.temperature > 80 ? 'alert' : '';
+                        table.innerHTML += `
+                            <tr>
+                                <td>${item.device_id}</td>
+                                <td class="${tempAlert}">${item.temperature}</td>
+                                <td>${item.voltage}</td>
+                                <td>${date}</td>
+                            </tr>`;
+                    });
+                })
+                .catch(err => console.error('Error:', err));
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
